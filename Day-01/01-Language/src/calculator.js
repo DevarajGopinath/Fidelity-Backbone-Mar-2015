@@ -4,8 +4,5 @@ function add(x,y){
         if (typeof n === "function") return parseArg(n());
         return isNaN(n) ? 0 : parseInt(n,10);
     }
-    var result = 0;
-    for(var i=0;i < arguments.length; i++)
-        result += parseArg(arguments[i]);
-    return result;    
+    return arguments.length <= 1 ? parseArg(arguments[0]) : parseArg(arguments[0]) + add([].slice.call(arguments,1));
 }
