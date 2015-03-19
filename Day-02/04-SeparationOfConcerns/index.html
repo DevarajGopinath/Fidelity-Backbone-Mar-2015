@@ -23,8 +23,38 @@
     </style>
     <script src="jquery-1.11.2.js"></script>
     <script>
+    function createAttribute(default){
+        var _val = default;
+        return function(val){
+            if (typeof val === "undefined") return _val;
+            _val = val;
+            /* trigger event */
+        }
+    }
     /*Model*/
     function SalaryCalculator(){
+        /* Basic */
+
+        var _basic = 0;
+        /*this.getBasic = function(){
+            return _basic;
+        };
+        this.setBasic = function(val){
+            _basic = val;
+            //trigger event for "basic change"
+        }*/
+
+        /*this.basic = (function(){
+            var _basic = 0;
+            return function(val){
+                if (typeof val === "undefined") return _basic;
+                _basic = val;
+                //trigger event for "basic change"
+            }
+        })();*/
+        this.basic = createAttribute(0);
+
+
         this.basic = 0;
         this.hra = 0;
         this.da = 0;
