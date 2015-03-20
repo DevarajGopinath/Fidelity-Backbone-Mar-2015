@@ -23,7 +23,11 @@
     </style>
     <script src="jquery-1.11.2.js"></script>
     <script>
-
+        function bind(fn, obj){
+            return function(){
+                return fn.apply(obj,arguments);
+            }
+        }
 
     /*Model*/
     function SalaryCalculator(){
@@ -58,11 +62,11 @@
             //Fill in the blanks
         };
 
-        function triggerEvents(attrName){
+        var triggerEvents = (function (attrName){
             var listenerFn = _events[attrName];
             if (typeof listenerFn === "function")
-                listenerFn();
-        }
+                listenerFn.call(this);
+        }).bind(this);
 
     }
     SalaryCalculator.prototype.calculate = function(){
@@ -75,6 +79,8 @@
     /*View*/
     $(function(){
         window.calculator = new SalaryCalculator();
+
+        /*UI Interaction events*/
         $("#txtBasic").change(function(){
             calculator.set('basic', parseInt(this.value,0));
         });
@@ -91,13 +97,26 @@
         $("#btnCalculate").click(function(){
             calculator.calculate();
         });
+        /* ******************************** */
 
-        $("#rangeTax").change(function(){
-            $("#spanTax").html(this.value + '%');
-        });
-
+        /*Model change events*/
         calculator.addListener('salary', function(){
-            $("#divResult").html(calculator.get('salary'));
+
+            $("#divResult").html(this.get('salary'));
+        });
+        calculator.addListener("basic", function(){
+            console.log(this);
+            $("#txtBasic").val(this.get('basic'));
+        });
+        calculator.addListener("hra", function(){
+            $("#txtHra").val(this.get('hra'));
+        });
+        calculator.addListener("da", function(){
+            $("#txtDa").val(this.get('da'));
+        });
+        calculator.addListener("tax", function(){
+            $("#rangeTax").val(this.get('tax'));
+            $("#spanTax").html(this.get('tax') + '%');
         });
     });
     /* ****************************** */
