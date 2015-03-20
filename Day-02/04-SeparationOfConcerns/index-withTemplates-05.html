@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Salary Calculator</title>
+    <style>
+        h1{
+            border-top: 2px solid blue;
+            border-bottom: 2px solid blue;
+            padding: 10px;
+            background-color: lightblue;
+        }
+        #divResult{
+            color : red;
+            font-size: 28pt;
+        }
+        label{
+            display : block;
+        }
+        .field{
+            margin-bottom: 15px;
+        }
+        .content{
+            border : 1px double black;
+            background-color: #e7e7e7;
+            margin: 10px;
+            padding: 10px;
+        }
+    </style>
+    <script src="jquery-1.11.2.js"></script>
+    <script src="handlebars.js"></script>
+    <script>
+    /*Model*/
+    function SalaryCalculator(defaults){
+
+        var _data = defaults || {};
+
+        this.get = function(attrName){
+            return _data[attrName];
+        };
+        this.set = function(attrName, value){
+            _data[attrName] = value;
+            triggerEvents(attrName);
+        };
+
+        var _events = {  };
+
+        this.addListener = function(attrName, listenerFn){
+            if (typeof _events[attrName] === "undefined")
+                _events[attrName] = [];
+            _events[attrName].push( listenerFn);
+        };
+
+        this.removeEventListener = function(attrName, listenerFn){
+            //Fill in the blanks
+        };
+
+        var triggerEvents = (function (attrName){
+            var listenerFns = _events[attrName] || [];
+            var self = this;
+            listenerFns.forEach(function (listenerFn){
+                        listenerFn.call(self);
+            });
+        }).bind(this);
+
+        this.toJSON = function(){
+            var result = {};
+            for(var key in _data)
+                result[key] = _data[key];
+            return result;
+        }
+
+    }
+    SalaryCalculator.prototype.calculate = function(){
+        var gross = this.get('basic') + this.get('hra') + this.get('da');
+        var net = gross * ((100-this.get('tax'))/100);
+        this.set('salary', net);
+    }
+    /* ****************************** */
+
+     /*View*/
+    function SalaryCalculatorView(calculator){
+
+        var $root = this.$root = $("<div></div>");
+
+        this.initialize = function(){
+            /*UI Interaction events*/
+            $root.on("change", "#txtBasic", function(){
+                calculator.set('basic', parseInt(this.value,0));
+            });
+            $root.on("change", "#txtHra", function(){
+                calculator.set('hra', parseInt(this.value,0));
+            });
+            $root.on("change", "#txtDa", function(){
+                calculator.set('da', parseInt(this.value,0));
+            });
+            $root.on("change", "#rangeTax", function(){
+                calculator.set('tax', parseInt(this.value,0));
+            });
+
+            $root.on("click", "#btnCalculate", function(){
+                calculator.calculate();
+            });
+            /* ******************************** */
+
+            /*Model change events*/
+            var self = this;
+            calculator.addListener('salary', function(){
+               self.render();
+            });
+            calculator.addListener("basic", function(){
+                self.render();
+            });
+            calculator.addListener("hra", function(){
+                self.render();
+            });
+            calculator.addListener("da", function(){
+                self.render();
+            });
+            calculator.addListener("tax", function(){
+                self.render();
+            });
+        }
+
+        this.render = function(){
+            console.log("generating view once again");
+            var templateString = $("#calculatorTemplate").html();
+            var templateFn = Handlebars.compile(templateString);
+            var generatedHTML = templateFn(calculator.toJSON());
+            this.$root.html(generatedHTML);
+        }
+    }
+
+
+    /* ****************************** */
+    </script>
+    <script type="text/template" id="calculatorTemplate">
+    <div class="content">
+        <div class="field">
+            <label for="">Basic :</label>
+            <input type="text" name="" id="txtBasic" value="{{basic}}">
+            </div>
+        <div class="field">
+            <label for="">HRA :</label>
+            <input type="text" name="" id="txtHra" value="{{hra}}">
+        </div>
+        <div class="field">
+            <label for="">DA :</label>
+            <input type="text" name="" id="txtDa" value="{{da}}">
+        </div>
+        <div class="field">
+            <label for="">Tax %:</label>
+            <input type="range" name="" id="rangeTax" min="0" max="30" value="{{tax}}">
+            <span id="spanTax">{{tax}}%</span>
+        </div>
+        <div class="field">
+            <input type="button" value="Calculate" id="btnCalculate">
+        </div>
+        <div>
+            <div id="divResult">{{salary}}</div>
+        </div>
+    </div>
+
+    </script>
+</head>
+<body>
+    <h1>Salary Calculator</h1>
+
+</body>
+</html>
