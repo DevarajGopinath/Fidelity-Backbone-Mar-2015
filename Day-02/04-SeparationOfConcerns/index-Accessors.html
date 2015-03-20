@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Salary Calculator</title>
+    <style>
+        h1{
+            border-top: 2px solid blue;
+            border-bottom: 2px solid blue;
+            padding: 10px;
+            background-color: lightblue;
+        }
+        #divResult{
+            color : red;
+            font-size: 28pt;
+        }
+        label{
+            display : block;
+        }
+        .field{
+            margin-bottom: 15px;
+        }
+    </style>
+    <script src="jquery-1.11.2.js"></script>
+    <script>
+    var ko = (function(){
+        function createAttribute(attrName, defaults){
+            var _val = defaults;
+            return function(val){
+                if (typeof val === "undefined") return _val;
+                _val = val;
+                triggerEvents(attrName);
+            }
+        }
+        var _events = {};
+        function addEventListener(attrName, eventListener){
+            _events[attrName] = eventListener;
+        };
+        function triggerEvents(attrName){
+            if (typeof _events[attrName] === "function")
+                _events[attrName]();
+        }
+        return {
+            observable : createAttribute,
+            addEventListener : addEventListener
+        }
+    })();
+
+    /*Model*/
+    function SalaryCalculator(){
+
+        this.basic = ko.observable('basic', 0);
+        this.hra = ko.observable('hra',0);
+        this.da = ko.observable('da',0),
+        this.tax = ko.observable('tax',0);
+        this.salary = ko.observable('salary',0);
+
+
+    }
+    SalaryCalculator.prototype.calculate = function(){
+        var gross = this.basic() + this.hra() + this.da();
+        var net = gross * ((100-this.tax())/100);
+        this.salary( net);
+    }
+    /* ****************************** */
+
+    /*View*/
+    $(function(){
+        window.calculator = new SalaryCalculator();
+        $("#txtBasic").change(function(){
+            calculator.basic(parseInt(this.value,0));
+        });
+        $("#txtHra").change(function(){
+            calculator.hra(parseInt(this.value,0));
+        });
+        $("#txtDa").change(function(){
+            calculator.da(parseInt(this.value,0));
+        });
+        $("#rangeTax").change(function(){
+            calculator.tax(parseInt(this.value,0));
+        });
+
+        $("#btnCalculate").click(function(){
+            calculator.calculate();
+        });
+
+        $("#rangeTax").change(function(){
+            $("#spanTax").html(this.value + '%');
+        });
+
+        ko.addEventListener('salary', function(){
+            $("#divResult").html(calculator.salary());
+        });
+    });
+    /* ****************************** */
+    </script>
+</head>
+<body>
+    <h1>Salary Calculator</h1>
+    <div class="content">
+        <div class="field">
+            <label for="">Basic :</label>
+            <input type="text" name="" id="txtBasic">
+            </div>
+        <div class="field">
+            <label for="">HRA :</label>
+            <input type="text" name="" id="txtHra">
+        </div>
+        <div class="field">
+            <label for="">DA :</label>
+            <input type="text" name="" id="txtDa">
+        </div>
+        <div class="field">
+            <label for="">Tax %:</label>
+            <input type="range" name="" id="rangeTax" min="0" max="30" value="0">
+            <span id="spanTax">[Tax]</span>
+        </div>
+        <div class="field">
+            <input type="button" value="Calculate" id="btnCalculate">
+        </div>
+        <div>
+            <div id="divResult">[Salary]</div>
+        </div>
+    </div>
+</body>
+</html>
