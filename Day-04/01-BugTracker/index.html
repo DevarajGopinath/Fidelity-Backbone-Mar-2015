@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bug Tracker</title>
+    <style>
+    .closed {
+        color : red;
+        text-decoration: line-through;
+        font-weight: bold;
+        font-style: italic;
+    }
+    </style>
+    <script src="jquery.js"></script>
+    <script>
+    function Bug(defaults){
+        var _data = defaults || {};
+        this.get = function(attrName){
+            return _data[attrName];
+        };
+        this.set = function(attrName, value){
+            _data[attrName] = value;
+            triggerChange(attrName);
+        };
+
+        var _events = {};
+        this.addListener = function(attrName, listenerFn){
+            _events[attrName] = _events[attrName] || [];
+            _events[attrName].push(listenerFn);
+        }
+        var triggerChange = (function(attrName){
+            var listenerFns = _events[attrName] || [];
+            listenerFns.forEach(function(listenerFn){
+                listenerFn.call(this);
+            },this);
+        }).bind(this);
+    }
+    Bug.prototype.toggleStatus = function(){
+        this.set('isClosed', !this.get('isClosed'));
+    }
+
+    function BugView(bug){
+        var $root = this.$root = $("<li>");
+        this.initialize = function(){
+            $root.click(this.toggleBugStatus);
+            bug.addListener("title", this.render);
+            bug.addListener("isClosed", this.render);
+        }
+        this.toggleBugStatus = function(){
+            bug.toggleStatus();
+        }
+        var self = this;
+        this.render = function(){
+            $root.html(bug.get('title'));
+            if (bug.get('isClosed')){
+                $root.addClass("closed");
+            } else {
+                $root.removeClass("closed");
+            }
+            return self;
+        }
+    }
+    </script>
+</head>
+<body>
+    <!--<h1>Bug Tracker</h1>
+    <div class="content">
+        <label for="">Bug :</label>
+        <input type="text" name="" id="txtBug">
+        <input type="button" value="Add Bug" id="btnAdd">
+        <input type="button" value="Remove Closed" id="btnRemoveClosed">
+        <ol id="olBugList"></ol>
+    </div>-->
+</body>
+</html>
