@@ -22,29 +22,34 @@
         }
     </style>
     <script>
-    function SalaryCalculator(){
-        this.basic = 0;
-        this.hra = 0;
-        this.da = 0;
-        this.tax = 0;
-        this.salary = 0;
-    }
-    SalaryCalculator.prototype.calculate = function(){
-        var gross = parseInt(this.basic,10) + parseInt(this.hra,10) + parseInt(this.da,10);
-        var net = gross * ((100-parseInt(this.tax,10))/100);
-        this.salary = net;
-    }
+
     </script>
     <script src="angular.js"></script>
     <script>
         var myApp = angular.module("SalaryCalculatorApp",[]);
-        myApp.run(function($rootScope){
+        myApp.factory("SalaryCalculator", function(){
+            function SalaryCalculator(){
+                this.basic = 0;
+                this.hra = 0;
+                this.da = 0;
+                this.tax = 0;
+                this.salary = 0;
+            }
+            SalaryCalculator.prototype.calculate = function(){
+                var gross = parseInt(this.basic,10) + parseInt(this.hra,10) + parseInt(this.da,10);
+                var net = gross * ((100-parseInt(this.tax,10))/100);
+                this.salary = net;
+            }
+            return SalaryCalculator;
+        });
+        myApp.run(function($rootScope, SalaryCalculator){
+
             window.rootScope = $rootScope;
             $rootScope.calculator = new SalaryCalculator();
         })
     </script>
 </head>
-<body ng-app="SalaryCalculatorApp">
+<body ng-app="SalaryCalculatorApp"l>
     <h1>Salary Calculator</h1>
     <div class="content">
         <div class="field">

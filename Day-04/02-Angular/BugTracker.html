@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bug Tracker</title>
+    <style>
+        .closed {
+            color : red;
+            text-decoration: line-through;
+            font-weight: bold;
+            font-style: italic;
+        }
+        .timeStamp {
+            font-style: italic;
+            font-size: small;
+        }
+    </style>
+    <script src="angular.js"></script>
+    <script src="moment.js"></script>
+    <script>
+        var bugTrackerApp = angular.module("bugTrackerApp",[]);
+        bugTrackerApp.filter("toMoment", function(){
+            return function(data){
+                return moment(data).fromNow();
+            }
+        });
+        bugTrackerApp.factory("Bug", function(){
+            function Bug(defaults){
+                defaults = defaults || {title : '', isClosed : false, id : -1, createdAt : new Date()};
+                this.title = defaults.title;
+                this.isClosed = defaults.isClosed;
+                this.id = defaults.id;
+                this.createdAt = defaults.createdAt;
+            }
+            Bug.prototype.toggleStatus = function(){
+                this.isClosed = !this.isClosed;
+            }
+            return Bug;
+        });
+        bugTrackerApp.controller("bugListController", function($scope, Bug, $http){
+           /*$scope.bugs = [
+               new Bug({title : "Unable to login", isClosed : false}),
+               new Bug({title : "Server communication failure", isClosed : true}),
+               new Bug({title : "Session terminates interminently", isClosed : false}),
+           ];
+*/
+            $scope.bugs = [];
+            $http({method :"GET", url : "http://localhost:3000/bugs"})
+                .then(function(response){
+                    var bugsDataArray = response.data;
+                    $scope.bugs = bugsDataArray.map(function(bd){ return new Bug(bd);
+                });
+            });
+
+            $scope.addBug = function(bugTitle){
+               var newBug = new Bug({title : bugTitle, isClosed : false});
+               $scope.bugs.push(newBug);
+           }
+           $scope.toggleStatus = function(bug){
+               bug.toggleStatus();
+           }
+
+        });
+    </script>
+</head>
+<body ng-app="bugTrackerApp">
+    <h1>Bug Tracker</h1>
+    <div class="content" ng-controller="bugListController">
+        <hr>
+        Search : <input type="text" ng-model="searchBug.title">
+        <hr>
+        <label for="">Bug :</label>
+        <input type="text" name="" id="txtBugTitle" ng-model="newBugTitle">
+        <input type="button" value="Add Bug" ng-click="addBug(newBugTitle)">
+        <input type="button" value="Remove Closed">
+        <ol>
+            <li ng-repeat="bug in bugs | filter:searchBug" >
+                <div >
+                <span ng-class="{closed : bug.isClosed}" ng-click="toggleStatus(bug)"> {{bug.title}} </span> -
+                <span class="timeStamp">{{bug.createdAt | toMoment}}</span>
+                </div>
+
+            </li>
+        </ol>
+    </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "bugs": [
+    {
+      "id": 1,
+      "title": "unable to login",
+      "isClosed": false,
+      "createdAt": "2015-03-21T11:06:39.859Z"
+    },
+    {
+      "id": 2,
+      "title": "data not saved",
+      "isClosed": true,
+      "createdAt": "2015-03-21T12:06:39.859Z"
+    },
+    {
+      "id": 3,
+      "title": "server not reachable",
+      "isClosed": false,
+      "createdAt": "2015-03-21T10:06:39.859Z"
+    }
+  ]
+}
