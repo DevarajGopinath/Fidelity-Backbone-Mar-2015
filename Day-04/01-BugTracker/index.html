@@ -39,6 +39,35 @@
         this.set('isClosed', !this.get('isClosed'));
     }
 
+    function BugsCollection(){
+        var _data = [];
+        this.add = function(bug){
+            _data.push(bug);
+            triggerEvent("add",bug);
+        };
+        this.remove = function(bug){
+            _data.splice(_data.indexOf(bug));
+            triggerEvent("remove",bug);
+        };
+        this.get = function(index){
+            return _data[index];
+        }
+         var _events = {};
+        this.addListener = function(attrName, listenerFn){
+            _events[attrName] = _events[attrName] || [];
+            _events[attrName].push(listenerFn);
+        };
+        var triggerEvent = (function(attrName, bug){
+            var listenerFns = _events[attrName] || [];
+            listenerFns.forEach(function(listenerFn){
+                listenerFn.call(this, bug);
+            },this);
+        }).bind(this);
+        this.toJSON = function(){
+            return _data.slice(0);
+        }
+    }
+
     function BugView(bug){
         var $root = this.$root = $("<li>");
         this.initialize = function(){
@@ -60,16 +89,42 @@
             return self;
         }
     }
+
+    function BugsCollectionView(bugsCollection){
+        var $root = this.$root = $("div.content");
+        this.initialize = function(){
+            bugsCollection.addListener("add", this.addNewBugToList.bind(this));
+            $root.on("click", "#btnAdd", this.addNew);
+        };
+        this.addNewBugToList = function(newBug){
+            var bugView = new BugView(newBug);
+            bugView.initialize();
+            $root.find("#olBugList").append(bugView.render().$root);
+        }
+        this.addNew = function(){
+            var bugTitle = $("#txtBug",$root).val();
+            var newBug = new Bug({title : bugTitle, isClosed : false});
+            bugsCollection.add(newBug);
+        }
+        this.render = function(){
+            $("#olBugList > *").remove();
+            bugsCollection.toJSON().forEach(function(bug){
+                var bugView = new BugView(bug);
+                bugView.initialize();
+                $root.find("#olBugList").append(bugView.render().$root);
+            }, this);
+        }
+    }
     </script>
 </head>
 <body>
-    <!--<h1>Bug Tracker</h1>
+    <h1>Bug Tracker</h1>
     <div class="content">
         <label for="">Bug :</label>
         <input type="text" name="" id="txtBug">
         <input type="button" value="Add Bug" id="btnAdd">
         <input type="button" value="Remove Closed" id="btnRemoveClosed">
         <ol id="olBugList"></ol>
-    </div>-->
+    </div>
 </body>
 </html>
